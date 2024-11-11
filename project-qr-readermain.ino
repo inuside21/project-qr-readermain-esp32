@@ -348,8 +348,8 @@ void loop()
                 passDoor4 = "";
                 
                 //
-                preferences.putString("passAdmin", "1234");
-                passAdmin = "1234";
+                //preferences.putString("passAdmin", "1234");
+                //passAdmin = "1234";
                 
                 // return
                 displayMode = 24;
