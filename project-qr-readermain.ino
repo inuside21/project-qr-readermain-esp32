@@ -52,6 +52,8 @@ int displayMode = 0;            // 0 - idle / home
                                 // 22 - admin set door password access ok
                                 // 23 - admin new password access ok
                                 // 24 - admin reset password access ok
+
+                                // 30 - user locked
 int selectedDoor = 0;
 String passDoor1 = "";
 String passDoor2 = "";
@@ -59,6 +61,10 @@ String passDoor3 = "";
 String passDoor4 = "";
 String passAdmin = "";
 String currentPassword = "";
+int passDoorError1 = 0;
+int passDoorError2 = 0;
+int passDoorError3 = 0;
+int passDoorError4 = 0;
 
 // START
 // ====================================
@@ -172,6 +178,7 @@ void loop()
               {
                 digitalWrite(outPinDoor1, HIGH);
                 displayMode = 20;
+                passDoorError1 = 0;
                 displayAll();
                 delay(5000);
                 digitalWrite(outPinDoor1, LOW);
@@ -183,6 +190,7 @@ void loop()
               {
                 digitalWrite(outPinDoor2, HIGH);
                 displayMode = 20;
+                passDoorError2 = 0;
                 displayAll();
                 delay(5000);
                 digitalWrite(outPinDoor2, LOW);
@@ -194,6 +202,7 @@ void loop()
               {
                 digitalWrite(outPinDoor3, HIGH);
                 displayMode = 20;
+                passDoorError3 = 0;
                 displayAll();
                 delay(5000);
                 digitalWrite(outPinDoor3, LOW);
@@ -205,6 +214,7 @@ void loop()
               {
                 digitalWrite(outPinDoor4, HIGH);
                 displayMode = 20;
+                passDoorError4 = 0;
                 displayAll();
                 delay(5000);
                 digitalWrite(outPinDoor4, LOW);
@@ -215,12 +225,45 @@ void loop()
               // error
               else
               {
-                displayMode = 10;
-                displayAll();
-                delay(2000);
-                displayMode = 1;
-                displayAll();
-                return;
+                //
+                if (selectedDoor == 1)
+                {
+                  passDoorError1 = passDoorError1 + 1;
+                }
+                if (selectedDoor == 2)
+                {
+                  passDoorError2 = passDoorError2 + 1;
+                }
+                if (selectedDoor == 3)
+                {
+                  passDoorError3 = passDoorError3 + 1;
+                }
+                if (selectedDoor == 4)
+                {
+                  passDoorError4 = passDoorError4 + 1;
+                }
+
+                //
+                if (passDoorError1 >= 3 || passDoorError2 >= 3 || passDoorError3 >= 3 || passDoorError4 >= 3)
+                {
+                  //              
+                  displayMode = 30;
+                  displayAll();
+                  delay(10000);
+                  displayMode = 0;
+                  displayAll();
+                  return;
+                }
+                else
+                {
+                  //              
+                  displayMode = 10;
+                  displayAll();
+                  delay(2000);
+                  displayMode = 1;
+                  displayAll();
+                  return;
+                }
               }
             }
 
@@ -233,6 +276,7 @@ void loop()
                 currentPassword = "";
                 displayAll();
                 delay(100);
+                return;
               }
               // error
               else
@@ -242,6 +286,7 @@ void loop()
                 delay(2000);
                 displayMode = 2;
                 displayAll();
+                return;
               }
             }
 
@@ -255,21 +300,25 @@ void loop()
                 {
                   preferences.putString("passDoor1", currentPassword);
                   passDoor1 = currentPassword;
+                  passDoorError1 = 0;
                 }
                 if (selectedDoor == 2)
                 {
                   preferences.putString("passDoor2", currentPassword);
                   passDoor2 = currentPassword;
+                  passDoorError2 = 0;
                 }
                 if (selectedDoor == 3)
                 {
                   preferences.putString("passDoor3", currentPassword);
                   passDoor3 = currentPassword;
+                  passDoorError3 = 0;
                 }
                 if (selectedDoor == 4)
                 {
                   preferences.putString("passDoor4", currentPassword);
                   passDoor4 = currentPassword;
+                  passDoorError4 = 0;
                 }
                 
                 // return
@@ -296,6 +345,7 @@ void loop()
                 currentPassword = "";
                 displayAll();
                 delay(100);
+                return;
               }
               // error
               else
@@ -305,6 +355,7 @@ void loop()
                 delay(2000);
                 displayMode = 4;
                 displayAll();
+                return;
               }
             }
 
@@ -346,6 +397,12 @@ void loop()
                 passDoor3 = "";
                 preferences.putString("passDoor4", "");
                 passDoor4 = "";
+
+                //
+                passDoorError1 = 0;
+                passDoorError2 = 0;
+                passDoorError3 = 0;
+                passDoorError4 = 0;
                 
                 //
                 //preferences.putString("passAdmin", "1234");
@@ -367,6 +424,7 @@ void loop()
                 delay(2000);
                 displayMode = 6;
                 displayAll();
+                return;
               }
             }
           }
@@ -384,7 +442,6 @@ void loop()
             delay(100);
           }
         }
-      
       }
 
       // display idle?
@@ -435,10 +492,21 @@ void loop()
       if (displayMode == 0)
       {
         Serial.println("hayop1");
-        displayMode = 1;
-        selectedDoor = 1;
-        currentPassword = "";
-        displayAll();
+        if (passDoorError1 < 3)
+        {
+          displayMode = 1;
+          selectedDoor = 1;
+          currentPassword = "";
+          displayAll();
+        }
+        else
+        {
+          displayMode = 30;
+          displayAll();
+          delay(2000);
+          displayMode = 0;
+          displayAll();
+        }
       }
     }
     if (inPinDoor2Var)
@@ -446,10 +514,21 @@ void loop()
       if (displayMode == 0)
       {
         Serial.println("hayop2");
-        displayMode = 1;
-        selectedDoor = 2;
-        currentPassword = "";
-        displayAll();
+        if (passDoorError2 < 3)
+        {
+          displayMode = 1;
+          selectedDoor = 2;
+          currentPassword = "";
+          displayAll();
+        }
+        else
+        {
+          displayMode = 30;
+          displayAll();
+          delay(2000);
+          displayMode = 0;
+          displayAll();
+        }
       }
     }
     if (inPinDoor3Var)
@@ -457,10 +536,21 @@ void loop()
       if (displayMode == 0)
       {
         Serial.println("hayop3");
-        displayMode = 1;
-        selectedDoor = 3;
-        currentPassword = "";
-        displayAll();
+        if (passDoorError3 < 3)
+        {
+          displayMode = 1;
+          selectedDoor = 3;
+          currentPassword = "";
+          displayAll();
+        }
+        else
+        {
+          displayMode = 30;
+          displayAll();
+          delay(2000);
+          displayMode = 0;
+          displayAll();
+        }
       }
     }
     if (inPinDoor4Var)
@@ -468,10 +558,21 @@ void loop()
       if (displayMode == 0)
       {
         Serial.println("hayop4");
-        displayMode = 1;
-        selectedDoor = 4;
-        currentPassword = "";
-        displayAll();
+        if (passDoorError4 < 3)
+        {
+          displayMode = 1;
+          selectedDoor = 4;
+          currentPassword = "";
+          displayAll();
+        }
+        else
+        {
+          displayMode = 30;
+          displayAll();
+          delay(2000);
+          displayMode = 0;
+          displayAll();
+        }
       }
     }
   }
@@ -507,6 +608,7 @@ void displayAll()
   displayOkAdminSetDoor();
   displayOkAdminSetNew();
   displayOkAdminReset();
+  displayUserLocked();
 }
 
 void displayIdle()
@@ -713,11 +815,30 @@ void displayErrorUserPassword()
   }
 
   //
+  int retryCount = 0;
+  if (selectedDoor == 1)
+  {
+    retryCount = passDoorError1;
+  }
+  if (selectedDoor == 2)
+  {
+    retryCount = passDoorError2;
+  }
+  if (selectedDoor == 3)
+  {
+    retryCount = passDoorError3;
+  }
+  if (selectedDoor == 4)
+  {
+    retryCount = passDoorError4;
+  }
+
+  //
 //lcd.print("                ");
   lcd.setCursor(0,0);  
   lcd.print("    Invalid     ");
   lcd.setCursor(0,1);   
-  lcd.print("    Passkey     ");
+  lcd.print("   Passkey [" + String(retryCount) + "]  ");
 }
 
 void displayErrorAdminPassword()
@@ -798,4 +919,20 @@ void displayOkAdminReset()
   lcd.print(" Update  Admin ");
   lcd.setCursor(0,1);   
   lcd.print(" Reset Pass OK ");
+}
+
+void displayUserLocked()
+{
+  //
+  if (displayMode != 30)
+  {
+    return;  
+  }
+
+  //
+//lcd.print("                ");
+  lcd.setCursor(0,0);  
+  lcd.print(" This locker is ");
+  lcd.setCursor(0,1);   
+  lcd.print("     LOCKED     ");
 }
